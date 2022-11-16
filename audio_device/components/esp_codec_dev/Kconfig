@@ -1,0 +1,21 @@
+menu "Audio Codec configuration"
+
+    config CODEC_ES8311_SUPPORT
+        bool "Support ES8311 Codec Chip"
+        default y
+        help
+            Enable this option if you want to use codec ES8311.
+
+    config CODEC_ES7210_SUPPORT
+        bool "Support ES7210 Codec Chip"
+        default y
+        help
+            Enable this option if you want to use codec ES7210.
+
+    config CODEC_TAS5805M_SUPPORT
+        bool "Support TAS5805M Codec Chip"
+        default y
+        help
+            Enable this option if you want to use codec TAS5805M.
+
+ endmenu

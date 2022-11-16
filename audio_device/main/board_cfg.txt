@@ -1,0 +1,65 @@
+board_name: ESP_LYRAT_V4_2
+i2c: {scl: 23, sda: 18}
+i2s: {data_in: 35, data_out: 26, ws: 25, bck: 5, mck: 0}
+play_record: {type: ES8388, pa: 21, pa_gain: 10}
+
+board_name: ESP_LYRAT_V4_3
+i2c: {sda: 18, scl: 23}
+i2s: {data_out: 26, data_in: 35, ws: 25, bck: 5, mck: 0}
+play_record: {type: ES8388, pa: 21, pa_gain: 10}
+
+board_name: ESP_LYRAT_MINI_V1_1
+i2c: {sda: 18, scl: 23}
+i2s: {bck: 5, data_in: 35, data_out: 26, ws: 25, mck: 0}
+i2s: {bck: 32, data_in: 36, ws: 33, mck: 0}
+play: {type: ES8311, pa: 21, use_mclk: 0, pa_gain:20}
+record: {type: ES7243, i2s_port: 1}
+sdcard: {power: 13}
+key: {vol_up: 3000, vol_down: 2700, adc_channel: 3}
+
+board_name: ESP_LYRATD_MSC_V2_1
+i2c: {scl: 23, sda: 18}
+i2s: {data_out: 26, data_in: 35, ws: 25, bck: 5}
+spi: {sclk: 32, miso: 27, mosi: 33}
+play_record: {type: ZL38063, spi_port: 0, reset: 21, pa: 22, cs: 0, pa_gain:20}
+key: {vol_up: 500, vol_down: 1200, adc_channel: 3}
+
+board_name: ESP_LYRATD_MSC_V2_2
+i2c: {scl: 23, sda: 18}
+i2s: {ws: 25, data_in: 35, data_out: 26, bck: 5}
+spi: {mosi: 33, sclk: 32, miso: 27}
+play_record: {type: ZL38063, spi_port: 0, reset: 19, pa: 22, cs: 0, pa_gain:20}
+
+board_name: ESP32_KORVO_DU1906
+i2c: {scl: 23, sda: 18}
+i2s: {ws: 13, data_in: 39, data_out: 16, bck: 4, mck: 0}
+record: {type: ES7243}
+play: {type: TAS5805M, reset: 12, pa_gain:10}
+#play: {type: ES7148, pa: 12}
+key: {vol_up: 2900, vol_down: 2400, adc_channel: 0}
+
+board_name: ESP32_S2_KALUGA_1_V1_2
+i2c: {sda: 8, scl: 7}
+i2s: {bck: 18, data_in: 46, ws: 17, data_out: 12}
+play_record: {type: ES8311, use_mclk: 1}
+
+board_name: ESP32_S3_KORVO2_V3
+i2c: {scl: 18, sda: 17}
+i2s: {bck: 9, mck: 16, data_in: 10, data_out: 8, ws: 45}
+record: {type: ES7210}
+play: {type: ES8311, pa: 48, pa_gain:6}
+key: {vol_up: 180, vol_down: 600, adc_channel: 4}
+
+board_name: ESP32_S3_BOX_LITE
+i2c: {sda: 8, scl: 18}
+i2s: {data_in: 16, data_out: 15, ws: 47, bck: 17, mck: 2}
+record: {type: ES7243E}
+play: {type: ES8156, pa: 46}
+key: {vol_up: 800, vol_down: 2000, adc_channel: 0}
+
+board_name: ESP32_S3_BOX
+i2c: {sda: 8, scl: 18}
+i2s: {data_in: 16, data_out: 15, ws: 47, bck: 17, mck: 2}
+record: {type: ES7210}
+play: {type: ES8311, pa: 46}
+key: {vol_up: 190, vol_down: 1000, adc_channel: 0}
