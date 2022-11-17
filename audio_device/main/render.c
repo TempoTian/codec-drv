@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_err.h"
@@ -37,7 +38,7 @@
     }
 
 //#define BOARD_NAME "ESP32_KORVO_DU1906"
-//#define BOARD_NAME         "ESP32_S3_KORVO2_V3"
+// #define BOARD_NAME         "ESP32_S3_KORVO2_V3"
 //#define BOARD_NAME "ESP_LYRATD_MSC_V2_1"
 //#define BOARD_NAME "ESP_LYRAT_V4_2"
 //#define BOARD_NAME "ESP_LYRAT_MINI_V1_1"
@@ -202,6 +203,36 @@ static float get_db(int16_t v)
     return 20.0 * log10((float) v / 0x7fff);
 }
 
+const uint8_t* check_wav_size(codec_sample_info_t* fs, int* size)
+{
+    const uint8_t* s = pcm_start;
+    const uint8_t* e = pcm_end;
+    if (memcmp(s, "RIFF", 4) == 0 &&
+        memcmp(s + 8, "WAVE", 4) == 0) {
+        s += 12;
+        while (s < e) {
+            unsigned int chunk_size = *(unsigned int*) (s + 4);
+            if (memcmp(s, "fmt ", 4) == 0) {
+                fs->channel = (uint8_t)*(short*)(s+10);
+                fs->sample_rate = (uint32_t)*(int*)(s+12);
+                fs->bits_per_sample = (uint8_t)*(short*)(s+22);
+            } else if (memcmp(s, "data", 4) == 0){
+                s += 8;
+                int left = e - s;
+                if (left > chunk_size) {
+                    left = chunk_size;
+                }
+                *size = left;
+                ESP_LOGI(TAG, "sample:%d channel:%d bits:%d size %d",
+                    fs->sample_rate, fs->channel, fs->bits_per_sample, left);
+                return s;
+            }
+            s += chunk_size + 8;
+        }
+    }
+    return pcm_start;
+}
+
 static int play_internal()
 {
     if (render_res.play_handle == NULL) {
@@ -213,17 +244,19 @@ static int play_internal()
         .sample_rate = 8000,
         .channel = 2,
     };
+    int pcm_size = pcm_end - pcm_start;
+    const uint8_t *pcm_pos = check_wav_size(&fs, &pcm_size);
+    const uint8_t *pcm_limit = pcm_pos + pcm_size;
     int ret = esp_codec_dev_open(render_res.play_handle, &fs);
     int size = 1024;
     if (ret == 0) {
         esp_codec_dev_set_out_vol(render_res.play_handle, render_res.play_vol);
         int limit_size = 20 * fs.sample_rate * (fs.bits_per_sample >> 3) * fs.channel;
         int len = 0;
-        const uint8_t *pcm_pos = pcm_start;
         while (len < limit_size) {
             ret = size;
-            if (pcm_pos + size > pcm_end) {
-                ret = pcm_end - pcm_pos;
+            if (pcm_pos + size > pcm_limit) {
+                ret = pcm_limit - pcm_pos;
             }
             if (ret > 0) {
                 int res = esp_codec_dev_write(render_res.play_handle, (void *) pcm_pos, ret);
@@ -712,8 +745,42 @@ static void button_thread(void *arg)
     vTaskDelete(NULL);
 }
 
+static void play_open_door() {
+    int ret;
+    board_cfg = audio_board_get_cfg(BOARD_NAME);
+    if (board_cfg == NULL) {
+        ESP_LOGE(TAG, "Fail to get board for %s", BOARD_NAME);
+        return;
+    }
+    ret = audio_board_install_device(board_cfg);
+    if (ret != 0) {
+        ESP_LOGE(TAG, "Fail to install driver");
+        return;
+    }
+    ret = init_render();
+    LOG_ON_FAIL(ret);
+    //Set volume level
+    render_res.play_vol = 50;
+    for (int i = 0; i < 3; i++) {
+        play_internal();
+        vTaskDelay(2000 / portTICK_RATE_MS);
+    }
+
+    if (render_res.rec_handle) {
+        esp_codec_dev_close(render_res.rec_handle);
+    }
+    if (render_res.play_handle) {
+        esp_codec_dev_close(render_res.play_handle);
+    }
+    deinit_render();
+    audio_board_uninstall_device(board_cfg);
+    audio_board_free_cfg(board_cfg);
+}
+
 void app_main()
 {
+    play_open_door();
+    return;
     int ret;
     // get board settings
     board_cfg = audio_board_get_cfg(BOARD_NAME);
