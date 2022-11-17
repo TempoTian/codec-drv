@@ -759,8 +759,17 @@ static void play_open_door() {
     }
     ret = init_render();
     LOG_ON_FAIL(ret);
+    codec_dev_vol_map_t vol_map[2] = {
+        {.db_value = -96, .vol = 0},
+        {.db_value = 9, .vol = 100},
+    };
+    esp_codec_dev_vol_curve_t vol_curve = {
+        .vol_map = vol_map,
+        .count = 2,
+    };
+    esp_codec_dev_set_vol_curve(render_res.play_handle, &vol_curve);
     //Set volume level
-    render_res.play_vol = 50;
+    render_res.play_vol = 100;
     for (int i = 0; i < 3; i++) {
         play_internal();
         vTaskDelay(2000 / portTICK_RATE_MS);
